@@ -12,7 +12,8 @@ const AuthMiddleware = asyncHandler(async (req, res, next) => {
     }
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
-        req.user = await DataModel.findById(decoded.id)     
+        const user = await DataModel.findById(decoded.id)     
+        req.user = user;
         next();
     } catch (error) {
         res.status(401).json({status: 'Something went wrong'})
@@ -21,7 +22,7 @@ const AuthMiddleware = asyncHandler(async (req, res, next) => {
 
 const AdminCheck = asyncHandler(async (req, res, next) => {
     // console.log(req.user)
-    if(req.user.role !== 'admin'){
+    if(user.role !== 'admin'){
         res.status(404).json({status: 'You are not Admin user '})
     }
     next();
