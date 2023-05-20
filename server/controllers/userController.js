@@ -1,6 +1,7 @@
 const DataModel = require('../models/userModel');
 const asyncHandler = require('express-async-handler');
 const createToken = require('../utils/createToken');
+// const {validateMongoDBId} = require('../utils/validateMongoDBId');
 
 
 // User Create 
@@ -52,6 +53,7 @@ exports.getAllUsers =asyncHandler( async (req, res) => {
 // Get single User
 exports.getUser = asyncHandler(async (req, res) => {
   const {id} = req.params;
+  // validateMongoDBId(id)
   try {
     const data = await DataModel.findById(id)
     res.status(200).json({ status: "success", data: data });
@@ -63,6 +65,7 @@ exports.getUser = asyncHandler(async (req, res) => {
 //Delete User
 exports.deleteUser = asyncHandler(async (req, res) => {
   let {id} = req.params;
+  // validateMongoDBId(id)
   try {
     const deleteData = await DataModel.findByIdAndDelete(id)
     res.status(200).json({ status: "success", data: deleteData });
@@ -74,6 +77,7 @@ exports.deleteUser = asyncHandler(async (req, res) => {
 //Update User
 exports.updateUser = asyncHandler(async (req, res) => {
   let {id} = req.params;
+  // validateMongoDBId(id)
   let reqBody = req.body;
   let Data = {
     id,
@@ -92,6 +96,7 @@ exports.updateUser = asyncHandler(async (req, res) => {
 // Block an User
 exports.blockUser = asyncHandler(async(req, res) => {
   const {id} = req.params;
+  // validateMongoDBId(id)
   let Data = {
     id,
     isBlocked:true
@@ -103,9 +108,11 @@ exports.blockUser = asyncHandler(async(req, res) => {
     res.status(400).json({ status: "fail", message:"User Blocked Fail", data: error});
   }
 })
+
 // Unblock an User
 exports.unBlockUser = asyncHandler(async(req, res) => {
   const {id} = req.params;
+  // validateMongoDBId(id)
   let Data = {
     id,
     isBlocked:false
