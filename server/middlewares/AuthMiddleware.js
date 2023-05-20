@@ -22,7 +22,7 @@ const AuthMiddleware = asyncHandler(async (req, res, next) => {
 
 const AdminCheck = asyncHandler(async (req, res, next) => {
     // console.log(req.user)
-    if(user.role !== 'admin'){
+    if(req.user.role !== 'admin'){
         res.status(404).json({status: 'You are not Admin user '})
     }
     next();

@@ -88,3 +88,32 @@ exports.updateUser = asyncHandler(async (req, res) => {
     res.status(400).json({ status: "fail", data: error  });
   }
 })
+
+// Block an User
+exports.blockUser = asyncHandler(async(req, res) => {
+  const {id} = req.params;
+  let Data = {
+    id,
+    isBlocked:true
+  }
+  try {
+    const blockUser = await DataModel.findByIdAndUpdate(id, Data)
+    res.status(200).json({ status: "success", message:"User Blocked Success", data: Data});
+  } catch (error) {
+    res.status(400).json({ status: "fail", message:"User Blocked Fail", data: error});
+  }
+})
+// Unblock an User
+exports.unBlockUser = asyncHandler(async(req, res) => {
+  const {id} = req.params;
+  let Data = {
+    id,
+    isBlocked:false
+  }
+  try {
+  const unBlockUser = await DataModel.findByIdAndUpdate(id, Data)
+    res.status(200).json({ status: "success", message:"User Unblocked Success", data: Data});
+  } catch (error) {
+    res.status(400).json({ status: "fail", message:"User Unblocked Fail", data: error});
+  }
+})

@@ -29,6 +29,10 @@ var userSchema = new mongoose.Schema({
         type:String,
         default: "user"
     },
+    isBlocked:{
+        type: Boolean,
+        default: false,
+    },
 }, {timestamps: true});
 
 // for password hash 
