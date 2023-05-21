@@ -1,7 +1,7 @@
 const DataModel = require('../models/userModel');
 const asyncHandler = require('express-async-handler');
 const createToken = require('../utils/jwtToken');
-const refreshToken = require('../utils/refreshToken');
+const generateRefreshToken = require('../utils/refreshToken');
 // const {validateMongoDBId} = require('../utils/validateMongoDBId');
 
 
@@ -26,10 +26,10 @@ exports.login = asyncHandler(async(req, res) => {
   const passwordMatched = await findUser.isPasswordMatched(password)
   
   if (findUser && passwordMatched) {
-    // const refreshToken = await refreshToken(findUser?.id)
+    const refreshToken = await generateRefreshToken(findUser?._id)
     // console.log(refreshToken)
-    // const  updatedUser = await DataModel.findByIdAndUpdate(findUser.id, {refreshToken: refreshToken}, {new: true});
-    // res.cookie('refreshToken', refreshToken, {httpOnly:true, maxAge: 24*60*60*1000})
+    const  updatedUser = await DataModel.findByIdAndUpdate(findUser.id, {refreshToken: refreshToken}, {new: true});
+    res.cookie('refreshToken', refreshToken, {httpOnly:true, maxAge: 24*60*60*1000})
     const  data = {
       _id: findUser?._id,
       firstName: findUser?.firstName,
