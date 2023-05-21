@@ -33,7 +33,18 @@ var userSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
-}, {timestamps: true});
+    cart: {
+        type: Array,
+        default: []
+    },
+    address: [{type: mongoose.Schema.Types.ObjectId, ref:"Address"}],
+    wishList: [{type: mongoose.Schema.Types.ObjectId, ref:"Product"}],
+    refreshToken:{
+        type: String,
+    }
+}, 
+{timestamps: true}
+);
 
 // for password hash 
 userSchema.pre('save', async function (next){

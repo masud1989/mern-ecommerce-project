@@ -4,6 +4,7 @@ const app = express();
 const dotenv = require('dotenv').config();
 const router = require('./routes/authRoute');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const dbConnect = require('./config/dbConnect')
 
 // Security Middleware Lib import 
@@ -31,6 +32,7 @@ app.use(express.urlencoded({limit: '50mb'}))
 
 // Body Parser Implement
 app.use(bodyParser.json({}));
+app.use(cookieParser());
 
 // Request Rate Limit
 const limiter = rateLimit({windowMs: 15*60*1000, max:3000});

@@ -1,6 +1,7 @@
 const DataModel = require('../models/userModel');
 const asyncHandler = require('express-async-handler');
-const createToken = require('../utils/createToken');
+const createToken = require('../utils/jwtToken');
+const refreshToken = require('../utils/refreshToken');
 // const {validateMongoDBId} = require('../utils/validateMongoDBId');
 
 
@@ -25,6 +26,10 @@ exports.login = asyncHandler(async(req, res) => {
   const passwordMatched = await findUser.isPasswordMatched(password)
   
   if (findUser && passwordMatched) {
+    // const refreshToken = await refreshToken(findUser?.id)
+    // console.log(refreshToken)
+    // const  updatedUser = await DataModel.findByIdAndUpdate(findUser.id, {refreshToken: refreshToken}, {new: true});
+    // res.cookie('refreshToken', refreshToken, {httpOnly:true, maxAge: 24*60*60*1000})
     const  data = {
       _id: findUser?._id,
       firstName: findUser?.firstName,
@@ -122,5 +127,37 @@ exports.unBlockUser = asyncHandler(async(req, res) => {
     res.status(200).json({ status: "success", message:"User Unblocked Success", data: Data});
   } catch (error) {
     res.status(400).json({ status: "fail", message:"User Unblocked Fail", data: error});
+  }
+})
+
+
+// Make an user to admin 
+exports.makeAdmin = asyncHandler(async(req, res) => {
+  const {id} = req.params;
+  // validateMongoDBId(id)
+  let Data = {
+    id,
+    role:"admin"
+  }
+  try {
+  const admin = await DataModel.findByIdAndUpdate(id, Data)
+    res.status(200).json({ status: "success", message:"Admin made Success", data: Data});
+  } catch (error) {
+    res.status(400).json({ status: "fail", message:"Admin made Fail", data: error});
+  }
+})
+// Make admin to user 
+exports.makeUser = asyncHandler(async(req, res) => {
+  const {id} = req.params;
+  // validateMongoDBId(id)
+  let Data = {
+    id,
+    role:"user"
+  }
+  try {
+  const admin = await DataModel.findByIdAndUpdate(id, Data)
+    res.status(200).json({ status: "success", message:"User made Success", data: Data});
+  } catch (error) {
+    res.status(400).json({ status: "fail", message:"User made Fail", data: error});
   }
 })
