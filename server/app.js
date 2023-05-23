@@ -5,6 +5,7 @@ const dotenv = require('dotenv').config();
 const router = require('./routes/authRoute');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const morgan = require('morgan');
 const dbConnect = require('./config/dbConnect')
 
 // Security Middleware Lib import 
@@ -26,6 +27,7 @@ app.use(helmet());
 app.use(mongoSanitize());
 app.use(xss());
 app.use(hpp());
+app.use(morgan("dev"))
 
 app.use(express.json({limit: '50mb'}));
 app.use(express.urlencoded({limit: '50mb'}))

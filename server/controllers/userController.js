@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken');
 const DataModel = require('../models/userModel');
 const asyncHandler = require('express-async-handler');
 const createToken = require('../utils/jwtToken');
@@ -29,7 +30,7 @@ exports.login = asyncHandler(async(req, res) => {
     const refreshToken = await generateRefreshToken(findUser?._id)
     // console.log(refreshToken)
     const  updatedUser = await DataModel.findByIdAndUpdate(findUser.id, {refreshToken: refreshToken}, {new: true});
-    res.cookie('refreshToken', refreshToken, {httpOnly:true, maxAge: 24*60*60*1000})
+    res.cookie('refreshToken', refreshToken, {httpOnly:true, maxAge: 72*60*60*1000})
     const  data = {
       _id: findUser?._id,
       firstName: findUser?.firstName,
@@ -44,6 +45,54 @@ exports.login = asyncHandler(async(req, res) => {
     res.status(400).json({ status: "fail", message: "Invalid Credential" });
   }
 })
+
+// Handle Refresh Token 
+exports.handleRefreshToken = asyncHandler( async(req, res) => {
+  const cookie = req.cookies;
+  // console.log(cookie)
+  if(!cookie?.refreshToken) {
+    throw new ("No Refresh Token in Cookie")
+  }
+  const refreshToken = cookie.refreshToken;
+  // console.log(refreshToken)
+  const user = await DataModel.findOne({refreshToken})
+  if(!user){
+    throw new ("No Refresh Token Present in DB or not matched")
+  }
+  jwt.verify(refreshToken, process.env.JWT_SECRET, (err, decoded) =>{
+    if(user.id !== decoded?.id){
+      throw new ("Something Wrong Refresh Token ")
+    }
+    const accessToken = generateRefreshToken(user.id)
+    res.json({accessToken})
+  }) 
+})
+
+// Logout Functionality 
+exports.logout = asyncHandler( async(req, res) => {
+  const cookie = req.cookies;
+  if(!cookie?.refreshToken){
+    throw new Error("No Refresh Token in Cookies")
+  }
+  const refreshToken = cookie.refreshToken;
+  const user = await DataModel.find({refreshToken});
+  if(!user){
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: true,
+    })
+    return res.sendStatus(204)
+  }
+  await DataModel.findOneAndUpdate({
+     refreshToken: "",
+  })
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: true,
+  })
+  return res.sendStatus(204)
+})
+
 
 // Get all Users
 exports.getAllUsers =asyncHandler( async (req, res) => {
