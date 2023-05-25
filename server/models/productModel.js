@@ -20,6 +20,7 @@ var productSchema = new mongoose.Schema({
     price:{
         type:Number,
         required:true,
+        select: false,
     },
     category:{
         type: String,
@@ -34,6 +35,7 @@ var productSchema = new mongoose.Schema({
     quantity: {
         type: Number,
         required:true,
+        select: false,
     },
     soled: {
         type: Number,

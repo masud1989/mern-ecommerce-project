@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {createUser, login, getAllUsers, getUser, deleteUser, updateUser, blockUser, unBlockUser, makeAdmin, makeUser, handleRefreshToken, logout} = require('../controllers/userController');
-const { createProduct, getProduct, getAllProducts } = require('../controllers/productController');
+const { createProduct, getProduct, getAllProducts, updateProduct, deleteProduct, productList } = require('../controllers/productController');
 const {AuthMiddleware, AdminCheck} = require('../middlewares/AuthMiddleware');
 
 // Auth Routes 
@@ -19,9 +19,12 @@ router.post('/makeUser/:id', AuthMiddleware, AdminCheck, makeUser);
 router.post('/makeAdmin/:id', AuthMiddleware, AdminCheck, makeAdmin);
 
 // Product Route 
-router.post('/createProduct', AuthMiddleware, AdminCheck, createProduct)
-router.get('/getProduct/:id', getProduct)
-router.get('/getAllProducts', getAllProducts)
+router.post('/createProduct', AuthMiddleware, AdminCheck, createProduct);
+router.get('/getProduct/:id', getProduct);
+router.get('/getAllProducts', getAllProducts);
+router.post('/updateProduct/:id', updateProduct);
+router.get('/deleteProduct/:id', deleteProduct);
+router.get('/productList/:pageNo/:perPage/:searchKeyword', productList);
 
 
 module.exports = router;
