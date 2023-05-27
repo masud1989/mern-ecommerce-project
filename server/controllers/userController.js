@@ -3,6 +3,7 @@ const DataModel = require('../models/userModel');
 const asyncHandler = require('express-async-handler');
 const createToken = require('../utils/jwtToken');
 const generateRefreshToken = require('../utils/refreshToken');
+const sendEmail = require('../utils/sendMail');
 // const {validateMongoDBId} = require('../utils/validateMongoDBId');
 
 
@@ -223,5 +224,32 @@ exports.updatePassword = asyncHandler( async(req, res) => {
     res.json(updatedPassword)
   }else{
     res.json(user)
+  }
+})
+
+//Forgot Password Token
+exports.forgotPasswordToken = asyncHandler(async(req, res) => {
+  const {email} = req.body;
+  // console.log(email)
+  const user = await DataModel.findOne({email});
+  console.log(user)
+  if(!user) throw new Error('User is not found with this email');
+
+
+  try {
+    const token = await user.createPasswordResetToken();
+    await user.save();
+    const resetURL = `Hi, Please click the link to reset your password <a href='http://localhost:5000/api/v1/forgotPasswordToken/${token}'>Click Here</a>`
+    const data = {
+      to:email,
+      text:"Hey! User",
+      subject:"Forgot Password Link",
+      htm:resetURL,
+    }
+    sendEmail(data)
+    console.log(token)
+
+  } catch (error) {
+    throw new Error (error)
   }
 })
