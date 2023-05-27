@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {createUser, login, getAllUsers, getUser, deleteUser, updateUser, blockUser, unBlockUser, makeAdmin, makeUser, handleRefreshToken, logout} = require('../controllers/userController');
+const {createUser, login, getAllUsers, getUser, deleteUser, updateUser, updatePassword, blockUser, unBlockUser, makeAdmin, makeUser, handleRefreshToken, logout} = require('../controllers/userController');
 const { createProduct, getProduct, allProducts, getProductsByFilter, updateProduct, deleteProduct, productList } = require('../controllers/productController');
 const {AuthMiddleware, AdminCheck} = require('../middlewares/AuthMiddleware');
 
@@ -17,6 +17,7 @@ router.post('/blockUser/:id', AuthMiddleware, AdminCheck, blockUser);
 router.post('/unBlockUser/:id', AuthMiddleware, AdminCheck, unBlockUser);
 router.post('/makeUser/:id', AuthMiddleware, AdminCheck, makeUser);
 router.post('/makeAdmin/:id', AuthMiddleware, AdminCheck, makeAdmin);
+router.post('/updatePassword', AuthMiddleware, updatePassword);
 
 // Product Route 
 router.post('/createProduct', AuthMiddleware, AdminCheck, createProduct);

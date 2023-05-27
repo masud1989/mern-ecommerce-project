@@ -210,3 +210,18 @@ exports.makeUser = asyncHandler(async(req, res) => {
     res.status(400).json({ status: "fail", message:"User made Fail", data: error});
   }
 })
+
+// Update Password 
+exports.updatePassword = asyncHandler( async(req, res) => {
+  const {id} = req.user;
+  const {password} = req.body;
+  const user = await DataModel.findById(id);
+
+  if(password){
+    user.password = password;
+    const updatedPassword = await user.save()
+    res.json(updatedPassword)
+  }else{
+    res.json(user)
+  }
+})
