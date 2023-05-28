@@ -4,6 +4,7 @@ const asyncHandler = require('express-async-handler');
 const createToken = require('../utils/jwtToken');
 const generateRefreshToken = require('../utils/refreshToken');
 const sendEmail = require('../utils/sendMail');
+const crypto = require('crypto');
 // const {validateMongoDBId} = require('../utils/validateMongoDBId');
 
 
@@ -239,7 +240,7 @@ exports.forgotPasswordToken = asyncHandler(async(req, res) => {
   try {
     const token = await user.createPasswordResetToken();
     await user.save();
-    const resetURL = `Hi, Please click the link to reset your password <a href='http://localhost:5000/api/v1/forgotPasswordToken/${token}'>Click Here</a>`
+    const resetURL = `Hi, Please click the link to reset your password <a href='http://localhost:5000/api/v1/resetPassword/${token}'>Click Here</a>`
     const data = {
       to:email,
       text:"Hey! User",
@@ -247,9 +248,30 @@ exports.forgotPasswordToken = asyncHandler(async(req, res) => {
       htm:resetURL,
     }
     sendEmail(data)
-    console.log(token)
+    res.json(token)
+    // console.log(token)
 
   } catch (error) {
     throw new Error (error)
   }
+})
+
+//Reset Password
+exports.resetPassword = asyncHandler( async(req, res) => {
+  const {password} = req.body;
+  const {token} = req.params;
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+  console.log("Hello"+ " " +parseInt(hashedToken))
+  const user = await DataModel.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: {$gt: Date.now()}
+  })
+  console.log(user)
+
+  if(!user) throw new Error('Token Expired, Try again Later')
+    user.password = password;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save();
+    res.json(user)
 })
