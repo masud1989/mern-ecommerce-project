@@ -2,7 +2,9 @@ const express = require('express');
 const router = express.Router();
 const {createUser, login, getAllUsers, getUser, deleteUser, updateUser, updatePassword, blockUser, unBlockUser, makeAdmin, makeUser, handleRefreshToken, logout, forgotPasswordToken, resetPassword} = require('../controllers/userController');
 const { createProduct, getProduct, allProducts, getProductsByFilter, updateProduct, deleteProduct, productList } = require('../controllers/productController');
+const { createBlog, updateBlog, getBlog, getAllBlogs, deleteBlog, likeBlog, disLikeBlog } = require('../controllers/blogController');
 const {AuthMiddleware, AdminCheck} = require('../middlewares/AuthMiddleware');
+
 
 // Auth Routes 
 router.post('/createUser', createUser);
@@ -30,5 +32,13 @@ router.post('/updateProduct/:id', updateProduct);
 router.get('/deleteProduct/:id', deleteProduct);
 router.get('/productList/:pageNo/:perPage/:searchKeyword', productList);
 
+// Blog Routes 
+router.post('/createBlog', AuthMiddleware, AdminCheck, createBlog);
+router.post('/updateBlog/:id', AuthMiddleware, AdminCheck, updateBlog);
+router.get('/deleteBlog/:id', AuthMiddleware, AdminCheck, deleteBlog);
+router.post('/getBlog/:id', getBlog);
+router.get('/getAllBlogs', getAllBlogs);
+router.post('/likeBlog', AuthMiddleware, likeBlog);
+router.post('/disLikeBlog', AuthMiddleware, disLikeBlog);
 
 module.exports = router;
