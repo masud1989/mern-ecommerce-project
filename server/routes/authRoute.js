@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
+
 const {AuthMiddleware, AdminCheck} = require('../middlewares/AuthMiddleware');
 const { createProductCategory, updateProductCategory, deleteProductCategory, getProductCategory, getAllProductCategory } = require('../controllers/productCategoryController');
-
 const {createUser, login, getAllUsers, getUser, deleteUser, updateUser, updatePassword, blockUser, unBlockUser, makeAdmin, makeUser, handleRefreshToken, logout, forgotPasswordToken, resetPassword} = require('../controllers/userController');
 const { createProduct, getProduct, allProducts, getProductsByFilter, updateProduct, deleteProduct, productList } = require('../controllers/productController');
 const { createBlog, updateBlog, getBlog, getAllBlogs, deleteBlog, likeBlog, disLikeBlog } = require('../controllers/blogController');
 const { createBlogCategory, updateBlogCategory, deleteBlogCategory, getBlogCategory, getAllBlogCategory } = require('../controllers/blogCategoryController');
+const { createBrand, updateBrand, deleteBrand, getBrand, getAllBrand } = require('../controllers/brandController');
 
 
 // Auth Routes 
@@ -52,12 +53,18 @@ router.get('/getProductCategory/:id', AuthMiddleware, AdminCheck, getProductCate
 router.get('/getAllProductCategory', AuthMiddleware, AdminCheck, getAllProductCategory);
 
 //Blog Category Routes
-// router.post('/createBlogCategory', AuthMiddleware, AdminCheck, createBlogCategory);
 router.post('/createBlogCategory', AuthMiddleware, AdminCheck, createBlogCategory);
 router.post('/updateBlogCategory/:id', AuthMiddleware, AdminCheck, updateBlogCategory);
 router.get('/deleteBlogCategory/:id', AuthMiddleware, AdminCheck, deleteBlogCategory);
 router.get('/getBlogCategory/:id', AuthMiddleware, AdminCheck, getBlogCategory);
 router.get('/getAllBlogCategory', AuthMiddleware, AdminCheck, getAllBlogCategory);
+
+//Brand Routes
+router.post('/createBrand', AuthMiddleware, AdminCheck, createBrand);
+router.post('/updateBrand/:id', AuthMiddleware, AdminCheck, updateBrand);
+router.get('/deleteBrand/:id', AuthMiddleware, AdminCheck, deleteBrand);
+router.get('/getBrand/:id', AuthMiddleware, AdminCheck, getBrand);
+router.get('/getAllBrand', AuthMiddleware, AdminCheck, getAllBrand);
 
 
 
