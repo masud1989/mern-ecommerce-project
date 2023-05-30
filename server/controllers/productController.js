@@ -4,7 +4,8 @@ const asyncHandler = require('express-async-handler');
 const slugify = require('slugify');
 const ListService = require('../services/listService');
 const productModel = require('../models/productModel');
-const { get } = require('mongoose');
+const User = require('../models/userModel');
+// const { get } = require('mongoose');
 
 exports.createProduct = asyncHandler( async(req, res) => {
     const reqBody = req.body;
@@ -106,5 +107,27 @@ exports.productList = async (req, res) => {
     let SearchArray = [{Name:SearchRgx}]
     let Result = await ListService(req, ProductModel, SearchArray)
     res.status(200).json(Result)
-}
+};
+
+exports.addToWishlist = asyncHandler( async(req, res) => {
+    const {_id }= req.user;
+    const {productId} = req.body;
+
+    try {
+        const user = await User.findById({_id});
+        // console.log(user)
+        const alreadyAdded = user.wishList.find( (id) => id.toString() === productId);
+        if(alreadyAdded){
+            let user = await User.findByIdAndUpdate(_id, {$pull: {wishList: productId}});
+            res.json(user);
+        }else{
+            let user = await User.findByIdAndUpdate(_id, {$push: {wishList: productId}});
+            res.json(user); 
+        }
+    } catch (error) {
+        throw new Error(error)
+    }
+
+
+})
 
