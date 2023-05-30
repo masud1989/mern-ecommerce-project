@@ -29,13 +29,13 @@ var blogSchema = new mongoose.Schema({
     likes: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "User"
+            ref: "users"
         }
     ],
     disLikes: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "User"
+            ref: "users"
         }
     ],
     image: {
@@ -57,4 +57,4 @@ var blogSchema = new mongoose.Schema({
 });
 
 //Export the model
-module.exports = mongoose.model('Blog', blogSchema);
+module.exports = mongoose.model('blog', blogSchema);

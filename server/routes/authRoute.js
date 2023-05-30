@@ -1,9 +1,12 @@
 const express = require('express');
 const router = express.Router();
+const {AuthMiddleware, AdminCheck} = require('../middlewares/AuthMiddleware');
+const { createProductCategory, updateProductCategory, deleteProductCategory, getProductCategory, getAllProductCategory } = require('../controllers/productCategoryController');
+
 const {createUser, login, getAllUsers, getUser, deleteUser, updateUser, updatePassword, blockUser, unBlockUser, makeAdmin, makeUser, handleRefreshToken, logout, forgotPasswordToken, resetPassword} = require('../controllers/userController');
 const { createProduct, getProduct, allProducts, getProductsByFilter, updateProduct, deleteProduct, productList } = require('../controllers/productController');
 const { createBlog, updateBlog, getBlog, getAllBlogs, deleteBlog, likeBlog, disLikeBlog } = require('../controllers/blogController');
-const {AuthMiddleware, AdminCheck} = require('../middlewares/AuthMiddleware');
+const { createBlogCategory, updateBlogCategory, deleteBlogCategory, getBlogCategory, getAllBlogCategory } = require('../controllers/blogCategoryController');
 
 
 // Auth Routes 
@@ -40,5 +43,22 @@ router.post('/getBlog/:id', getBlog);
 router.get('/getAllBlogs', getAllBlogs);
 router.post('/likeBlog', AuthMiddleware, likeBlog);
 router.post('/disLikeBlog', AuthMiddleware, disLikeBlog);
+
+//Product Category Routes
+router.post('/createProductCategory', AuthMiddleware, AdminCheck, createProductCategory);
+router.post('/updateProductCategory/:id', AuthMiddleware, AdminCheck, updateProductCategory);
+router.get('/deleteProductCategory/:id', AuthMiddleware, AdminCheck, deleteProductCategory);
+router.get('/getProductCategory/:id', AuthMiddleware, AdminCheck, getProductCategory);
+router.get('/getAllProductCategory', AuthMiddleware, AdminCheck, getAllProductCategory);
+
+//Blog Category Routes
+// router.post('/createBlogCategory', AuthMiddleware, AdminCheck, createBlogCategory);
+router.post('/createBlogCategory', AuthMiddleware, AdminCheck, createBlogCategory);
+router.post('/updateBlogCategory/:id', AuthMiddleware, AdminCheck, updateBlogCategory);
+router.get('/deleteBlogCategory/:id', AuthMiddleware, AdminCheck, deleteBlogCategory);
+router.get('/getBlogCategory/:id', AuthMiddleware, AdminCheck, getBlogCategory);
+router.get('/getAllBlogCategory', AuthMiddleware, AdminCheck, getAllBlogCategory);
+
+
 
 module.exports = router;
