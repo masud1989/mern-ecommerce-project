@@ -8,6 +8,7 @@ const { createProduct, getProduct, allProducts, getProductsByFilter, updateProdu
 const { createBlog, updateBlog, getBlog, getAllBlogs, deleteBlog, likeBlog, disLikeBlog } = require('../controllers/blogController');
 const { createBlogCategory, updateBlogCategory, deleteBlogCategory, getBlogCategory, getAllBlogCategory } = require('../controllers/blogCategoryController');
 const { createBrand, updateBrand, deleteBrand, getBrand, getAllBrand } = require('../controllers/brandController');
+const { createCoupon, updateCoupon, deleteCoupon, getAllCoupons } = require('../controllers/couponController');
 
 
 // Auth Routes 
@@ -67,6 +68,12 @@ router.post('/updateBrand/:id', AuthMiddleware, AdminCheck, updateBrand);
 router.get('/deleteBrand/:id', AuthMiddleware, AdminCheck, deleteBrand);
 router.get('/getBrand/:id', AuthMiddleware, AdminCheck, getBrand);
 router.get('/getAllBrand', AuthMiddleware, AdminCheck, getAllBrand);
+
+//Coupon Routes
+router.post('/createCoupon', AuthMiddleware, AdminCheck, createCoupon);
+router.post('/updateCoupon/:id', AuthMiddleware, AdminCheck, updateCoupon);
+router.post('/deleteCoupon/:id', AuthMiddleware, AdminCheck, deleteCoupon);
+router.get('/getAllCoupons', AuthMiddleware, AdminCheck, getAllCoupons);
 
 
 
