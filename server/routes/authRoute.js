@@ -3,19 +3,21 @@ const router = express.Router();
 
 const {AuthMiddleware, AdminCheck} = require('../middlewares/AuthMiddleware');
 const { createProductCategory, updateProductCategory, deleteProductCategory, getProductCategory, getAllProductCategory } = require('../controllers/productCategoryController');
-const {createUser, login, getAllUsers, getUser, deleteUser, updateUser, updatePassword, blockUser, unBlockUser, makeAdmin, makeUser, handleRefreshToken, logout, forgotPasswordToken, resetPassword} = require('../controllers/userController');
-const { createProduct, getProduct, allProducts, getProductsByFilter, updateProduct, deleteProduct, productList, addToWishlist, rating } = require('../controllers/productController');
+const {createUser, login, getAllUsers, getUser, deleteUser, updateUser, updatePassword, blockUser, unBlockUser, makeAdmin, makeUser, handleRefreshToken, logout, forgotPasswordToken, resetPassword, adminLogin, getWishList} = require('../controllers/userController');
+const { createProduct, getProduct, allProducts, getProductsByFilter, updateProduct, deleteProduct, productList, addToWishlist, rating, uploadImages } = require('../controllers/productController');
 const { createBlog, updateBlog, getBlog, getAllBlogs, deleteBlog, likeBlog, disLikeBlog } = require('../controllers/blogController');
 const { createBlogCategory, updateBlogCategory, deleteBlogCategory, getBlogCategory, getAllBlogCategory } = require('../controllers/blogCategoryController');
 const { createBrand, updateBrand, deleteBrand, getBrand, getAllBrand } = require('../controllers/brandController');
 const { createCoupon, updateCoupon, deleteCoupon, getAllCoupons } = require('../controllers/couponController');
+const { uploadPhoto, productImgResize } = require('../middlewares/uploadImages');
 
 
-// Auth Routes 
+// User/Auth Routes 
 router.post('/createUser', createUser);
 router.post('/forgotPasswordToken', forgotPasswordToken)
 router.put('/resetPassword/:token', resetPassword)
 router.post('/login', login);
+router.post('/adminLogin', adminLogin);
 router.get('/logout', logout);
 router.get('/refreshToken', handleRefreshToken);
 router.get('/getAllUsers', AuthMiddleware, getAllUsers);
@@ -27,6 +29,7 @@ router.post('/unBlockUser/:id', AuthMiddleware, AdminCheck, unBlockUser);
 router.post('/makeUser/:id', AuthMiddleware, AdminCheck, makeUser);
 router.post('/makeAdmin/:id', AuthMiddleware, AdminCheck, makeAdmin);
 router.post('/updatePassword', AuthMiddleware, updatePassword);
+router.get('/getWishList', AuthMiddleware, getWishList);
 
 // Product Route 
 router.post('/createProduct', AuthMiddleware, AdminCheck, createProduct);
@@ -50,6 +53,7 @@ router.post('/disLikeBlog', AuthMiddleware, disLikeBlog);
 
 //Product Category Routes
 router.post('/createProductCategory', AuthMiddleware, AdminCheck, createProductCategory);
+router.post('upload/:id', AuthMiddleware, AdminCheck, uploadPhoto.array("images", 10), productImgResize, uploadImages);
 router.post('/updateProductCategory/:id', AuthMiddleware, AdminCheck, updateProductCategory);
 router.get('/deleteProductCategory/:id', AuthMiddleware, AdminCheck, deleteProductCategory);
 router.get('/getProductCategory/:id', AuthMiddleware, AdminCheck, getProductCategory);

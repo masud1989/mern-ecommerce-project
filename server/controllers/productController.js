@@ -191,3 +191,7 @@ exports.rating = asyncHandler ( async(req, res) => {
     }
 });
 
+exports.uploadImages = asyncHandler( async(req, res) => {
+    console.log(req.files)
+})
+

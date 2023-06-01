@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
-const DataModel = require('../models/userModel');
+const User = require('../models/userModel');
+const Product = require('../models/productModel');
 const asyncHandler = require('express-async-handler');
 const createToken = require('../utils/jwtToken');
 const generateRefreshToken = require('../utils/refreshToken');
@@ -12,10 +13,10 @@ const crypto = require('crypto');
 exports.createUser = asyncHandler(async (req, res) => {
   const reqBody = req.body;
   const email = reqBody.email;
-  const ExistingUser = await DataModel.findOne({ email: email });
+  const ExistingUser = await User.findOne({ email: email });
 
   if (!ExistingUser) {
-    const NewUser = await DataModel.create(reqBody);
+    const NewUser = await User.create(reqBody);
     res.status(200).json({ status: "success", data: NewUser });
   } else {
     res.status(400).json({ status: "fail", message: "Email already exists" });
@@ -25,13 +26,13 @@ exports.createUser = asyncHandler(async (req, res) => {
 // User Login
 exports.login = asyncHandler(async(req, res) => {
   const {email, password} = req.body;
-  const findUser = await DataModel.findOne({email});
+  const findUser = await User.findOne({email});
   const passwordMatched = await findUser.isPasswordMatched(password)
   
   if (findUser && passwordMatched) {
     const refreshToken = await generateRefreshToken(findUser?._id)
     // console.log(refreshToken)
-    const  updatedUser = await DataModel.findByIdAndUpdate(findUser.id, {refreshToken: refreshToken}, {new: true});
+    const  updatedUser = await User.findByIdAndUpdate(findUser.id, {refreshToken: refreshToken}, {new: true});
     res.cookie('refreshToken', refreshToken, {httpOnly:true, maxAge: 72*60*60*1000})
     const  data = {
       _id: findUser?._id,
@@ -40,6 +41,35 @@ exports.login = asyncHandler(async(req, res) => {
       email: findUser?.email,
       mobile: findUser?.mobile,
       token: createToken(findUser?._id)
+    }
+    res.status(200).json({ status: "success", data: data });  
+  } 
+  else {
+    res.status(400).json({ status: "fail", message: "Invalid Credential" });
+  }
+})
+// Admin Login
+exports.adminLogin = asyncHandler(async(req, res) => {
+  const {email, password} = req.body;
+  const adminUser = await User.findOne({email});
+  // console.log(adminUser)
+  const passwordMatched = await adminUser.isPasswordMatched(password)
+  
+  if(adminUser.role !== 'admin'){
+    res.json({status: 'fail', message:'Not Admin Credentials'})
+  }; 
+  if (adminUser && passwordMatched) {
+    const refreshToken = await generateRefreshToken(adminUser?._id)
+    // console.log(refreshToken)
+    const  updatedUser = await User.findByIdAndUpdate(adminUser.id, {refreshToken: refreshToken}, {new: true});
+    res.cookie('refreshToken', refreshToken, {httpOnly:true, maxAge: 72*60*60*1000})
+    const  data = {
+      _id: adminUser?._id,
+      firstName: adminUser?.firstName,
+      lastName: adminUser?.lastName,
+      email: adminUser?.email,
+      mobile: adminUser?.mobile,
+      token: createToken(adminUser?._id)
     }
     res.status(200).json({ status: "success", data: data });  
   } 
@@ -57,7 +87,7 @@ exports.handleRefreshToken = asyncHandler( async(req, res) => {
   }
   const refreshToken = cookie.refreshToken;
   // console.log(refreshToken)
-  const user = await DataModel.findOne({refreshToken})
+  const user = await User.findOne({refreshToken})
   if(!user){
     throw new ("No Refresh Token Present in DB or not matched")
   }
@@ -77,7 +107,7 @@ exports.logout = asyncHandler( async(req, res) => {
     throw new Error("No Refresh Token in Cookies")
   }
   const refreshToken = cookie.refreshToken;
-  const user = await DataModel.find({refreshToken});
+  const user = await User.find({refreshToken});
   if(!user){
     res.clearCookie("refreshToken", {
       httpOnly: true,
@@ -85,7 +115,7 @@ exports.logout = asyncHandler( async(req, res) => {
     })
     return res.sendStatus(204)
   }
-  await DataModel.findOneAndUpdate({
+  await User.findOneAndUpdate({
      refreshToken: "",
   })
   res.clearCookie("refreshToken", {
@@ -99,7 +129,7 @@ exports.logout = asyncHandler( async(req, res) => {
 // Get all Users
 exports.getAllUsers =asyncHandler( async (req, res) => {
   try {
-    const data = await DataModel.find();
+    const data = await User.find();
     res.status(200).json({ status: "success", total:data.length, data: data  });
   } catch (error) {
     res.status(400).json({ status: "fail", message: "Sorry! Error Ocurred" });
@@ -111,7 +141,7 @@ exports.getUser = asyncHandler(async (req, res) => {
   const {id} = req.params;
   // validateMongoDBId(id)
   try {
-    const data = await DataModel.findById(id)
+    const data = await User.findById(id)
     res.status(200).json({ status: "success", data: data });
   } catch (error) {
     res.status(400).json({ status: "fail", data: error  });
@@ -123,7 +153,7 @@ exports.deleteUser = asyncHandler(async (req, res) => {
   let {id} = req.params;
   // validateMongoDBId(id)
   try {
-    const deleteData = await DataModel.findByIdAndDelete(id)
+    const deleteData = await User.findByIdAndDelete(id)
     res.status(200).json({ status: "success", data: deleteData });
   } catch (error) {
     res.status(400).json({ status: "fail", data: error  });
@@ -142,7 +172,7 @@ exports.updateUser = asyncHandler(async (req, res) => {
     email: reqBody?.email,
     mobile: reqBody?.mobile,}
   try {
-    const updatedData = await DataModel.findByIdAndUpdate(id, Data)
+    const updatedData = await User.findByIdAndUpdate(id, Data)
     res.status(200).json({ status: "success", data: Data});
   } catch (error) {
     res.status(400).json({ status: "fail", data: error  });
@@ -158,7 +188,7 @@ exports.blockUser = asyncHandler(async(req, res) => {
     isBlocked:true
   }
   try {
-    const blockUser = await DataModel.findByIdAndUpdate(id, Data)
+    const blockUser = await User.findByIdAndUpdate(id, Data)
     res.status(200).json({ status: "success", message:"User Blocked Success", data: Data});
   } catch (error) {
     res.status(400).json({ status: "fail", message:"User Blocked Fail", data: error});
@@ -174,7 +204,7 @@ exports.unBlockUser = asyncHandler(async(req, res) => {
     isBlocked:false
   }
   try {
-  const unBlockUser = await DataModel.findByIdAndUpdate(id, Data)
+  const unBlockUser = await User.findByIdAndUpdate(id, Data)
     res.status(200).json({ status: "success", message:"User Unblocked Success", data: Data});
   } catch (error) {
     res.status(400).json({ status: "fail", message:"User Unblocked Fail", data: error});
@@ -191,7 +221,7 @@ exports.makeAdmin = asyncHandler(async(req, res) => {
     role:"admin"
   }
   try {
-  const admin = await DataModel.findByIdAndUpdate(id, Data)
+  const admin = await User.findByIdAndUpdate(id, Data)
     res.status(200).json({ status: "success", message:"Admin made Success", data: Data});
   } catch (error) {
     res.status(400).json({ status: "fail", message:"Admin made Fail", data: error});
@@ -206,7 +236,7 @@ exports.makeUser = asyncHandler(async(req, res) => {
     role:"user"
   }
   try {
-  const admin = await DataModel.findByIdAndUpdate(id, Data)
+  const admin = await User.findByIdAndUpdate(id, Data)
     res.status(200).json({ status: "success", message:"User made Success", data: Data});
   } catch (error) {
     res.status(400).json({ status: "fail", message:"User made Fail", data: error});
@@ -217,7 +247,7 @@ exports.makeUser = asyncHandler(async(req, res) => {
 exports.updatePassword = asyncHandler( async(req, res) => {
   const {id} = req.user;
   const {password} = req.body;
-  const user = await DataModel.findById(id);
+  const user = await User.findById(id);
 
   if(password){
     user.password = password;
@@ -232,7 +262,7 @@ exports.updatePassword = asyncHandler( async(req, res) => {
 exports.forgotPasswordToken = asyncHandler(async(req, res) => {
   const {email} = req.body;
   // console.log(email)
-  const user = await DataModel.findOne({email});
+  const user = await User.findOne({email});
   console.log(user)
   if(!user) throw new Error('User is not found with this email');
 
@@ -262,7 +292,7 @@ exports.resetPassword = asyncHandler( async(req, res) => {
   const {token} = req.params;
   const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
   console.log("Hello"+ " " +parseInt(hashedToken))
-  const user = await DataModel.findOne({
+  const user = await User.findOne({
     passwordResetToken: hashedToken,
     passwordResetExpires: {$gt: Date.now()}
   })
@@ -275,3 +305,15 @@ exports.resetPassword = asyncHandler( async(req, res) => {
     await user.save();
     res.json(user)
 })
+
+// Get WishList 
+exports.getWishList = asyncHandler( async(req, res) => {
+  const {_id} = req.user;
+  try {
+    const findUser = await User.findById(_id).populate('wishList');
+    res.json({status: 'success', data: findUser})
+  } catch (error) {
+    // res.json({status: 'fail', error: error})
+    throw new Error(error)
+  }
+});
