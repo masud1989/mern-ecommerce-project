@@ -6,21 +6,21 @@ cloudinary.config({
     api_secret: process.env.CLOUD_API_SECRET 
   });
 
-const cloudinaryUploadImg = async (fileToUploads) => {
-    return new Promise( (resolve) => {
-        cloudinary.uploader.upload(fileToUploads, (result)=>{
+
+  exports.cloudinaryUploadImage =  (fileToUploads) => {
+    return new Promise(resolve => {
+        cloudinary.uploader.upload(fileToUploads, (result) => {
             resolve(
                 {
-                    url:result.secure_url,
+                    url: result.url,
                 },
                 {
-                    resource_type: "auto",
+                    resource_type: 'auto',
                 }
             )
-        }) 
+        })
     })
-}
+  }
 
-module.exports = cloudinaryUploadImg
 
 

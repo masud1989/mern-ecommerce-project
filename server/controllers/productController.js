@@ -5,6 +5,8 @@ const slugify = require('slugify');
 const ListService = require('../services/listService');
 const Product = require('../models/productModel');
 const User = require('../models/userModel');
+const { cloudinaryUploadImage } = require('../utils/cloudinary');
+const fs = require('fs')
 // const { get } = require('mongoose');
 
 exports.createProduct = asyncHandler( async(req, res) => {
@@ -16,7 +18,6 @@ exports.createProduct = asyncHandler( async(req, res) => {
         throw new Error(error)
     }   
 });
-
 exports.getProduct = asyncHandler( async(req, res) => {
     const id = req.params.id;
     try {
@@ -26,7 +27,6 @@ exports.getProduct = asyncHandler( async(req, res) => {
         throw new Error(error)
     }   
 });
-
 exports.getProductsByFilter = asyncHandler( async(req, res) => {
     try {
         // Filtering 
@@ -80,7 +80,6 @@ exports.allProducts = asyncHandler( async(req, res) => {
         throw new Error(error)
     }   
 });
-
 exports.updateProduct =  asyncHandler( async(req, res) => {
     const id = req.params.id;
     const PostBody = req.body;
@@ -91,7 +90,6 @@ exports.updateProduct =  asyncHandler( async(req, res) => {
         throw new Error(error)
     } 
 });
-
 exports.deleteProduct =  asyncHandler( async(req, res) => {
     const id = req.params.id;
     try {
@@ -101,14 +99,12 @@ exports.deleteProduct =  asyncHandler( async(req, res) => {
         throw new Error(error)
     } 
 });
-
 exports.productList = async (req, res) => {
     let SearchRgx = {"$regex":req.params.searchKeyword, "$options": "i"}
     let SearchArray = [{Name:SearchRgx}]
     let Result = await ListService(req, ProductModel, SearchArray)
     res.status(200).json(Result)
 };
-
 exports.addToWishlist = asyncHandler( async(req, res) => {
     const {_id }= req.user;
     const {productId} = req.body;
@@ -128,7 +124,6 @@ exports.addToWishlist = asyncHandler( async(req, res) => {
         throw new Error(error)
     }
 });
-
 exports.rating = asyncHandler ( async(req, res) => {
     const {_id} = req.user;
     const {star, productId, comment} = req.body;
@@ -190,8 +185,35 @@ exports.rating = asyncHandler ( async(req, res) => {
         throw new Error(error)
     }
 });
-
 exports.uploadImages = asyncHandler( async(req, res) => {
     console.log(req.files)
+    const id = req.params.id;
+    try {
+        const uploader = (path) => cloudinaryUploadImage(path, "images")
+        const urls = [];
+        const files = req.files;
+        console.log(files)
+
+        for(const file of files){
+            const {path} = file;
+            const newPath = await uploader(path);
+            urls.push(newPath)
+            fs.unlinkSync(path)
+        }
+
+        const findProduct = await Product.findByIdAndUpdate(id, {
+            images: urls.map( (file) => {
+                return file;
+            })
+        }, 
+        {
+            new: true
+        }
+        )
+    res.json(findProduct)
+
+    } catch (error) {
+        throw new Error(error)
+    }
 })
 

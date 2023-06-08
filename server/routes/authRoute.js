@@ -5,11 +5,11 @@ const {AuthMiddleware, AdminCheck} = require('../middlewares/AuthMiddleware');
 const { createProductCategory, updateProductCategory, deleteProductCategory, getProductCategory, getAllProductCategory } = require('../controllers/productCategoryController');
 const {createUser, login, getAllUsers, getUser, deleteUser, updateUser, updatePassword, blockUser, unBlockUser, makeAdmin, makeUser, handleRefreshToken, logout, forgotPasswordToken, resetPassword, adminLogin, getWishList} = require('../controllers/userController');
 const { createProduct, getProduct, allProducts, getProductsByFilter, updateProduct, deleteProduct, productList, addToWishlist, rating, uploadImages } = require('../controllers/productController');
-const { createBlog, updateBlog, getBlog, getAllBlogs, deleteBlog, likeBlog, disLikeBlog } = require('../controllers/blogController');
+const { createBlog, updateBlog, getBlog, getAllBlogs, deleteBlog, likeBlog, disLikeBlog, uploadBlogImages } = require('../controllers/blogController');
 const { createBlogCategory, updateBlogCategory, deleteBlogCategory, getBlogCategory, getAllBlogCategory } = require('../controllers/blogCategoryController');
 const { createBrand, updateBrand, deleteBrand, getBrand, getAllBrand } = require('../controllers/brandController');
 const { createCoupon, updateCoupon, deleteCoupon, getAllCoupons } = require('../controllers/couponController');
-const { uploadPhoto, productImgResize } = require('../middlewares/uploadImages');
+const { uploadPhoto, productImgResize, blogImgResize } = require('../middlewares/uploadImages');
 
 
 // User/Auth Routes 
@@ -41,6 +41,9 @@ router.get('/deleteProduct/:id', deleteProduct);
 router.get('/productList/:pageNo/:perPage/:searchKeyword', productList);
 router.post('/addToWishlist', AuthMiddleware, addToWishlist );
 router.post('/rating', AuthMiddleware, rating);
+router.post('/uploadImages/:id', AuthMiddleware, AdminCheck, uploadPhoto.array('images', 10), productImgResize, uploadImages);
+
+
 
 // Blog Routes 
 router.post('/createBlog', AuthMiddleware, AdminCheck, createBlog);
@@ -50,6 +53,8 @@ router.post('/getBlog/:id', getBlog);
 router.get('/getAllBlogs', getAllBlogs);
 router.post('/likeBlog', AuthMiddleware, likeBlog);
 router.post('/disLikeBlog', AuthMiddleware, disLikeBlog);
+router.post('/uploadBlogImages/:id', AuthMiddleware, AdminCheck, uploadPhoto.array('images', 10), blogImgResize, uploadBlogImages);
+
 
 //Product Category Routes
 router.post('/createProductCategory', AuthMiddleware, AdminCheck, createProductCategory);

@@ -1,14 +1,16 @@
 const multer = require("multer");
 const sharp = require("sharp");
 const path = require("path");
+const fs = require("fs");
+
 
 const multerStorage = multer.diskStorage({
     destination: function (req, file, cb){
         cb(null, path.join(__dirname, "../public/images"));
     },
-    filename: function (req, file, cd){
-        const uniqueSuffix = Date.now() + Math.round(Math.random() * le9);
-        cb(null, file.fieldname + "-" + uniqueSuffix + ".jpeg");
+    filename: function (req, file, cb){
+        const uniqueSuffix = Date.now() + Math.round(Math.random() * 1e9);
+        cb(null, file.fieldname + uniqueSuffix + ".jpeg");
     }
 });
 
@@ -38,6 +40,7 @@ const productImgResize = async (req, res, next) => {
         .toFormat("jpeg")
         .jpeg({ quality: 90 })
         .toFile(`public/images/products/${file.filename}`);
+        fs.unlinkSync(`public/images/products/${file.filename}`);
     })
   );
   next();
@@ -52,6 +55,7 @@ const blogImgResize = async (req, res, next) => {
         .toFormat("jpeg")
         .jpeg({ quality: 90 })
         .toFile(`public/images/blogs/${file.filename}`);
+        fs.unlinkSync(`public/images/blogs/${file.filename}`);
     })
   );
   next();
