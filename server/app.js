@@ -53,9 +53,9 @@ app.use(limiter);
 
 
 // Mongo DB Database Connection 
-dbConnect()
+dbConnect();
 
-// let URI = "mongodb+srv://<username>:<password>@cluster0.ergjf.mongodb.net/task-manager"
+// let URI = "mongodb+srv://<username>:<password>@cluster0.ergjf.mongodb.net/ecommerce-project"
 // let OPTION = {user: 'testUser6666', pass: 'testUser6666', autoIndex: true}
 // mongoose.connect(URI, OPTION, (error)=>{
 //     console.log('DB Connection Success');

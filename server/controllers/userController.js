@@ -1,11 +1,13 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
+const Cart = require('../models/cartModel');
 const Product = require('../models/productModel');
 const asyncHandler = require('express-async-handler');
 const createToken = require('../utils/jwtToken');
 const generateRefreshToken = require('../utils/refreshToken');
 const sendEmail = require('../utils/sendMail');
 const crypto = require('crypto');
+const uniqid = require('uniqid');
 // const {validateMongoDBId} = require('../utils/validateMongoDBId');
 
 
@@ -30,7 +32,7 @@ exports.login = asyncHandler(async(req, res) => {
   const passwordMatched = await findUser.isPasswordMatched(password)
   
   if (findUser && passwordMatched) {
-    const refreshToken = await generateRefreshToken(findUser?._id)
+    const refreshToken = await generateRefreshToken(findUser?.id)
     // console.log(refreshToken)
     const  updatedUser = await User.findByIdAndUpdate(findUser.id, {refreshToken: refreshToken}, {new: true});
     res.cookie('refreshToken', refreshToken, {httpOnly:true, maxAge: 72*60*60*1000})
@@ -211,7 +213,6 @@ exports.unBlockUser = asyncHandler(async(req, res) => {
   }
 })
 
-
 // Make an user to admin 
 exports.makeAdmin = asyncHandler(async(req, res) => {
   const {id} = req.params;
@@ -317,3 +318,71 @@ exports.getWishList = asyncHandler( async(req, res) => {
     throw new Error(error)
   }
 });
+
+// Save Address
+exports.saveAddress = asyncHandler( async(req, res, next) => {
+  const id = req.user.id;
+  const postBody = req.body;
+  try {
+    const updateUserAddress = await User.findByIdAndUpdate(id, { address: postBody?.address})
+  res.json(updateUserAddress).populate('address')
+  } catch (error) {
+    throw new Error(error) 
+  }
+});
+
+//Add to Cart
+exports.userCart =  asyncHandler( async(req, res) => {
+ const  {cart} = req.body;
+//  console.log(cart)
+ const {id} = req.user;
+//  console.log(id)
+
+try {
+  let products = [];
+  const user = await User.findById(id);
+  
+  const alreadyExistCart = await Cart.findOne({ orderby: user.id});
+  
+  if(alreadyExistCart){
+    alreadyExistCart.remove();
+  }
+
+  for (let i = 0; i < cart?.length; i++) {
+    let cartObject = {};
+    cartObject.product = cart[i].id;
+    cartObject.count = cart[i].count;
+    cartObject.color = cart[i].color;
+    let getPrice = await Product.findById(cart[i].id).select("price").exec();
+    // console.log(getPrice)
+    cartObject.price = getPrice.price;
+
+    products.push(cartObject)
+    console.log(products)
+  };
+
+  let cartTotal = 0;
+  for (let i = 0; i < products.length; i++) {
+    let price
+    cartTotal = cartTotal + products[i].price * products[i].count; 
+  }
+  console.log(cartTotal)
+
+
+
+  let newCart = await new Cart({
+    products,
+    cartTotal,
+    orderby: user?.id
+  }).save();
+ 
+  res.json(newCart)
+
+} catch (error) {
+  throw new Error(error)
+}
+
+})
+
+//User Cart
+
